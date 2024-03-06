@@ -1,7 +1,31 @@
-use std::thread;
+/// Overview
+/// This program is a template for how to split up global data and perform a computation-heavy task
+/// (like sorting) concurrently by spinning multiple threads.
+/// Basically a Divide and Conquer while avoiding data races.
 
+/// Problem
+/// Because static mutable variables are inherently unsafe due to potential data races,
+/// Rust does not directly allow mutable statics without an unsafe block.
+/// Also, the size of mutable static variables must be known at compile time, but this cannot
+/// be done with a vector since its size is dynamic.
+
+/// Solution
+/// 'Mutex' ensures that access to the array is synchronized, preventing data races in multithreaded contexts
+/// 'lazy_static!' allows to define SORTED_ARR as a static reference to a Mutex-protected array, providing safe, global mutable access.
+/// The array is initialized the first time it's accessed, thanks to lazy_static!, avoiding the limitations of Rust's const-eval system for static initializers
+
+extern crate lazy_static;
+use std::thread;
+use std::sync::{Mutex};
+use lazy_static::lazy_static;
+
+// Immutable global array remains the same
 static ARR: [i32; 14] = [16, 26, 53, 44, 65, 36, 77, 89, 91, 106, 51, 62, 123, 69];
 
+// Mutable global empty array that will hold the sorted array
+lazy_static! {
+    static ref SORTED_ARR: Mutex<[i32; 14]> = Mutex::new([0; 14]);
+}
 
 fn main() {
     // Split the array into 2 slices at middle index
@@ -14,11 +38,23 @@ fn main() {
     let sorted_first_half = sorting_thread1.join().unwrap();
     let sorted_second_half = sorting_thread2.join().unwrap();
 
-    let merging_thread = thread::spawn(move || { merge(sorted_first_half, sorted_second_half) });
+    // Merging thread modifies mutable static sorted array
+    // unsafe is acceptable because we know that this is the only thread that will mutate SORTED_ARR
+    let merging_thread = thread::spawn(move || {
+        let mut sorted_arr = SORTED_ARR.lock().unwrap();
+        let merged = merge(sorted_first_half, sorted_second_half);
 
-    let final_sorted_array = merging_thread.join().unwrap();
-    println!("Final sorted array: {:?}", final_sorted_array);
+        for (i, v) in merged.iter().enumerate() {
+            sorted_arr[i] = *v;
+        }
+    });
+
+    // Execute merging thread
+    merging_thread.join().unwrap();
+
+    println!("Sorted array: {:?}", *SORTED_ARR.lock().unwrap());
 }
+
 
 fn merge_sort<T: PartialOrd + Copy>(data: Vec<T>) -> Vec<T> {
     // Base case
