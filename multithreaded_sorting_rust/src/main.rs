@@ -44,7 +44,7 @@ fn main() {
         let mut sorted_arr = SORTED_ARR.lock().unwrap();
         // Get the full sorted array
         let merged = merge(sorted_first_half, sorted_second_half);
-        // Copy sorted array into global arrayc
+        // Copy sorted array into global array
 
         for (i, v) in merged.iter().enumerate() {
             sorted_arr[i] = *v;
@@ -92,9 +92,7 @@ fn merge<T: PartialOrd + Copy>(left: Vec<T>, right: Vec<T>) -> Vec<T> {
 
     // Add elements left over from other vector
     if i < left.len() { result.extend_from_slice(&left[i..]); }
-    if j < right.len() {
-        result.extend_from_slice(&right[j..]);
-    }
+    if j < right.len() { result.extend_from_slice(&right[j..]); }
 
     // return sorted vector
     result
