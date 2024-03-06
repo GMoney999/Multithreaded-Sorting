@@ -38,11 +38,13 @@ fn main() {
     let sorted_first_half = sorting_thread1.join().unwrap();
     let sorted_second_half = sorting_thread2.join().unwrap();
 
-    // Merging thread modifies mutable static sorted array
-    // unsafe is acceptable because we know that this is the only thread that will mutate SORTED_ARR
+    // Merging thread modifies mutable static array
     let merging_thread = thread::spawn(move || {
+        // Obtain a mutable reference to the static array protected by the mutex guard
         let mut sorted_arr = SORTED_ARR.lock().unwrap();
+        // Get the full sorted array
         let merged = merge(sorted_first_half, sorted_second_half);
+        // Copy sorted array into global arrayc
 
         for (i, v) in merged.iter().enumerate() {
             sorted_arr[i] = *v;
