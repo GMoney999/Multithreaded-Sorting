@@ -2,7 +2,7 @@
 /// Note: No Mutex is used
 /// To incorporate the mutex into your program, you would typically do so in areas where threads access or modify shared resources concurrently.
 /// This program does not need a Mutex for 2 reasons:
-///     1. There's no evident concurrent modification of shared resources by threads that would necessitate a Mutex for synchronization.
+///     1. There's no  concurrent modification of shared resources by threads that would necessitate a Mutex for synchronization.
 ///     2. The sorting and merging operations are structured to work on distinct data segments or are sequenced in a way (sorting first, followed by merging) that inherently avoids concurrent access issues.
 
 #include <pthread.h>
