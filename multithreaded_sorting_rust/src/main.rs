@@ -14,6 +14,7 @@
 /// 'lazy_static!' allows to define SORTED_ARR as a static reference to a Mutex-protected array, providing safe, global mutable access.
 /// The array is initialized the first time it's accessed, avoiding the limitations of Rust's const-eval system for static initializers
 
+//// DEPENDENCIES AND LIBRARY IMPORTS
 extern crate lazy_static;
 use std::thread;
 use std::sync::{Mutex};
